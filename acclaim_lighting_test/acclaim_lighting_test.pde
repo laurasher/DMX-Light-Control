@@ -8,6 +8,9 @@ ControlP5 cp5;
 //* Set number of lights here *//
 int num_lights = 2;
 
+//* This flag is for the stupid light. It has one xtra channel *//
+boolean stupid_flag = true;
+
 //* Assign enttec port to dmxpro object *//
 String DMXPRO_PORT = "/dev/tty.usbserial-ENWER12L";
 int DMXPRO_BAUDRATE=115000;
@@ -21,13 +24,9 @@ int[] red_channel = new int[num_lights];
 int[] green_channel = new int[num_lights];
 int[] blue_channel = new int[num_lights];
 
-//* This flag is for the stupid light. It has one xtra channel *//
-int stupid_flag = 1;
-
-
 void setup() {
   background(#9A9A9A);
-  size(200*num_lights,500);
+  size(200,500);
   noStroke();
   cp5 = new ControlP5(this);
   
@@ -39,6 +38,28 @@ void setup() {
     blue_channel[ind] = i+3;
     i=i+3;
   }
+  
+  if(stupid_flag){
+    i = 0;
+    for (int ind=0; ind<num_lights; ind++){
+      if(ind == 1){
+        red_channel[ind] = i+1+2;
+        green_channel[ind] = i+2+2;
+        blue_channel[ind] = i+3+2;
+        i=i+3;
+      }  
+      else{
+        red_channel[ind] = i+1;
+        green_channel[ind] = i+2;
+        blue_channel[ind] = i+3;
+        i=i+3;
+      }
+    }  
+  }
+  
+  println("red"); println(red_channel);
+  println("green"); println(green_channel);
+  println("blue"); println(blue_channel);
   
   dmxOutput=new DmxP512(this, universeSize, false);
   dmxOutput.setupDmxPro(DMXPRO_PORT, DMXPRO_BAUDRATE);
@@ -89,17 +110,29 @@ void draw(){
     dmxOutput.set(red_channel[0], RED);
     dmxOutput.set(green_channel[0], GREEN);
     dmxOutput.set(blue_channel[0], BLUE);
-    //println("red green blue  white"+ RED , GREEN , BLUE);
   }
   
   else {
+  if(stupid_flag){
+     dmxOutput.set(4,130);
+    //Go through array of channels
+    for (int i=0; i<num_lights; i++){
+      if(i==1){
+        dmxOutput.set(red_channel[i], GREEN);
+        dmxOutput.set(green_channel[i], BLUE);
+        dmxOutput.set(blue_channel[i], RED);
+      }
+      dmxOutput.set(red_channel[i], RED);
+      dmxOutput.set(green_channel[i], GREEN);
+      dmxOutput.set(blue_channel[i], BLUE);
+    }
+  }
+  
   //Go through array of channels
   for (int i=0; i<num_lights; i++){
     dmxOutput.set(red_channel[i], RED);
     dmxOutput.set(green_channel[i], GREEN);
     dmxOutput.set(blue_channel[i], BLUE);
-    println(green_channel[i]);
-//    println("red green blue white"+ RED , GREEN , BLUE);
   }
 }
 }
