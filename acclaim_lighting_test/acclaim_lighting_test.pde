@@ -5,8 +5,14 @@ import processing.serial.*;
 DmxP512 dmxOutput;
 ControlP5 cp5;
 
+
+//* This should work with Acclaim Lighting Dyna Graze HO EXterior DMX RGB setting *//
+// Need to put in RGB configuration (if can). 
+// Check serial number. 
+boolean RGBW = false; 
+
 //* Set number of lights here *//
-int num_lights = 2;
+int num_lights = 12;
 
 //* Assign enttec port to dmxpro object *//
 String DMXPRO_PORT = "/dev/tty.usbserial-ENWER12L";
@@ -16,18 +22,17 @@ int universeSize = num_lights*3;
 int RED = 0;
 int GREEN = 0;
 int BLUE = 0;
+int WHITE = 0;
 
 int[] red_channel = new int[num_lights];
 int[] green_channel = new int[num_lights];
 int[] blue_channel = new int[num_lights];
-
-//* This flag is for the stupid light. It has one xtra channel *//
-int stupid_flag = 1;
+int[] white_channel = new int[num_lights];
 
 
 void setup() {
   background(#9A9A9A);
-  size(200*num_lights,500);
+  size(200,500);
   noStroke();
   cp5 = new ControlP5(this);
   
@@ -37,7 +42,15 @@ void setup() {
     red_channel[ind] = i+1;
     green_channel[ind] = i+2;
     blue_channel[ind] = i+3;
-    i=i+3;
+    if(RGBW){
+      white_channel[ind] = i+4;
+    }
+    if(RGBW){
+      i=i+4;
+    }
+    else{
+      i=i+3;
+    }
   }
   
   dmxOutput=new DmxP512(this, universeSize, false);
@@ -46,7 +59,6 @@ void setup() {
 
   colorMode(RGB, 1);
   
- 
   //Slider gui
      int slider_width = 15; int slider_height = 300; int space_between = 40;
      int red_start_val = 0; int red_x_loc = 40; int red_y_loc = 100; 
@@ -82,25 +94,24 @@ void setup() {
       cp5.getController("BLUE").getValueLabel().alignX(ControlP5.CENTER);
       cp5.getController("BLUE").getCaptionLabel().align(ControlP5.CENTER, ControlP5.BOTTOM_OUTSIDE).setPaddingY(12);
    
+   println("red"); println(red_channel);
+   println("green"); println(green_channel);
+   println("blue"); println(blue_channel);
+   println("white"); println(white_channel);
+   
 }
 
+
+
 void draw(){
-  if (num_lights == 1){
-    dmxOutput.set(red_channel[0], RED);
-    dmxOutput.set(green_channel[0], GREEN);
-    dmxOutput.set(blue_channel[0], BLUE);
-    //println("red green blue  white"+ RED , GREEN , BLUE);
-  }
-  
-  else {
   //Go through array of channels
   for (int i=0; i<num_lights; i++){
     dmxOutput.set(red_channel[i], RED);
     dmxOutput.set(green_channel[i], GREEN);
     dmxOutput.set(blue_channel[i], BLUE);
-    println(green_channel[i]);
-//    println("red green blue white"+ RED , GREEN , BLUE);
-  }
+    if(RGBW){
+      dmxOutput.set(white_channel[i], WHITE);
+    }
 }
 }
 
